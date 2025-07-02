@@ -1,0 +1,29 @@
+version: '3.8' # Spécifie la version du format Docker Compose. La version 3.8 est recommandée pour les fonctionnalités les plus récentes.
+
+services: # Définit les services qui composent votre application. Ici, nous n'aurons qu'un seul service pour MariaDB.
+
+  mariadb_db: # Nom du service. C'est un nom que vous choisissez pour identifier ce conteneur dans votre configuration Docker Compose.
+    image: mariadb:latest # L'image Docker à utiliser. 'mariadb:latest' signifie que Docker téléchargera et utilisera la dernière version stable de MariaDB disponible sur Docker Hub.
+    container_name: ma_base_mariadb # Définit un nom spécifique pour le conteneur Docker créé à partir de ce service. Cela facilite l'identification du conteneur lors de l'utilisation de commandes Docker.
+    ports: # Mappe les ports entre l'hôte et le conteneur.
+      - "3307:3306" # Mappe le port 3306 du conteneur (port par défaut de MariaDB, identique à MySQL) au port 3306 de la machine hôte. Cela vous permet de vous connecter à la base de données depuis votre machine locale en utilisant le port 3306.
+    environment: # Définit les variables d'environnement qui seront passées au conteneur MariaDB. Ces variables sont essentielles pour la configuration initiale de MariaDB.
+      # MARIADB_ROOT_PASSWORD: your_strong_password # **OBLIGATOIRE**: Définit le mot de passe du compte 'root' de MariaDB. Remplacez 'your_strong_password' par un mot de passe fort et sécurisé.
+      MARIADB_DATABASE: photos # (OPTIONNEL): Définit le nom d'une base de données qui sera créée automatiquement au démarrage du conteneur si elle n'existe pas. Vous pouvez la renommer.
+      MARIADB_USER: photos # (OPTIONNEL): Définit le nom d'un nouvel utilisateur qui sera créé et autorisé à se connecter à 'my_mariadb_database'. Vous pouvez le renommer.
+      MARIADB_PASSWORD: photos # (OPTIONNEL): Définit le mot de passe pour l'utilisateur spécifié par MARIADB_USER. Remplacez par un mot de passe fort.
+      # MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes" # (DÉCONSEILLÉ POUR LA PRODUCTION): Si vous voulez autoriser un mot de passe root vide (TRÈS DÉCONSEILLÉ EN PRODUCTION). Décommentez pour les tests seulement.
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes" # (OPTIONNEL): Si vous souhaitez que Docker génère un mot de passe root aléatoire et le loggue dans les logs du conteneur. Utile pour des configurations rapides mais moins prévisibles.
+    volumes: # Mappe des volumes pour persister les données de la base de données. Sans cela, toutes les données seraient perdues à chaque redémarrage du conteneur.
+      - mariadb_data:/var/lib/mysql # Mappe le volume nommé 'mariadb_data' (défini plus bas) au répertoire '/var/lib/mysql' à l'intérieur du conteneur. C'est là que MariaDB stocke ses données. (Note: MariaDB utilise le même chemin par défaut que MySQL pour la compatibilité).
+      # Vous pouvez également monter un répertoire local si vous préférez:
+      # - ./data_mariadb:/var/lib/mysql # Cela monterait un répertoire 'data_mariadb' de votre machine hôte dans le conteneur. Assurez-vous que le répertoire 'data_mariadb' existe et que les permissions sont correctes.
+    restart: unless-stopped # Définit la politique de redémarrage du conteneur.
+      # - 'no': Ne redémarre pas automatiquement.
+      # - 'on-failure': Redémarre si le conteneur se termine avec un code d'erreur non nul.
+      # - 'always': Redémarre toujours le conteneur, même s'il s'arrête proprement.
+    # - 'unless-stopped': Redémarre toujours à moins qu'il ne soit explicitement arrêté par l'utilisateur (avec `docker stop`). C'est une bonne option pour la plupart des environnements.
+
+volumes: # Définit les volumes nommés utilisés par les services.
+  mariadb_data: # Déclare un volume nommé 'mariadb_data'. Docker gérera automatiquement la création et le stockage de ce volume.
+  # Les données de votre base de données MariaDB seront stockées ici, même si le conteneur est supprimé et recréé.
