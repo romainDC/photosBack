@@ -3,10 +3,13 @@ package pt.romain.photosback.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pt.romain.photosback.dto.PhotoDto;
+import pt.romain.photosback.dto.TeamDto;
 import pt.romain.photosback.entities.Photo;
+import pt.romain.photosback.entities.Team;
 import pt.romain.photosback.repository.PhotoRepository;
 import pt.romain.photosback.repository.UserRepository;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +35,13 @@ public class PhotoServiceImpl implements PhotoService
     {
         if (photo == null)
             return null;
+        Set<TeamDto> teamDtos = null;
+        if (photo.getTeams() != null) {
+            teamDtos = photo.getTeams()
+                    .stream()
+                    .map(teamService::convertEntityToDto)
+                    .collect(Collectors.toSet());
+        }
         return PhotoDto.builder()
                 .id(photo.getId())
                 .title(photo.getTitle())
@@ -44,10 +54,7 @@ public class PhotoServiceImpl implements PhotoService
                 .uploadedAt(photo.getUploadedAt())
                 .category(categoryService.convertEntityToDto(photo.getCategory()))
                 .owner(userService.convertEntityToDto(photo.getOwner()))
-                .teams(photo.getTeams()
-                        .stream()
-                        .map(teamService::convertEntityToDto)
-                        .collect(Collectors.toSet()))
+                .teams(teamDtos)
                 .build();
     }
 
@@ -56,6 +63,13 @@ public class PhotoServiceImpl implements PhotoService
     {
         if (photoDto == null)
             return null;
+        Set<Team> teams = null;
+        if (photoDto.teams() != null) {
+            teams = photoDto.teams()
+                    .stream()
+                    .map(teamService::convertDtoToEntity)
+                    .collect(Collectors.toSet());
+        }
         return Photo.builder()
                 .id(photoDto.id())
                 .title(photoDto.title())
@@ -68,10 +82,7 @@ public class PhotoServiceImpl implements PhotoService
                 .uploadedAt(photoDto.uploadedAt())
                 .category(categoryService.convertDtoToEntity(photoDto.category()))
                 .owner(userService.convertDtoToEntity(photoDto.owner()))
-                .teams(photoDto.teams()
-                        .stream()
-                        .map(teamService::convertDtoToEntity)
-                        .collect(Collectors.toSet()))
+                .teams(teams)
                 .build();
     }
 
