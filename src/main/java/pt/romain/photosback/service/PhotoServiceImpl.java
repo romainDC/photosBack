@@ -50,7 +50,7 @@ public class PhotoServiceImpl implements PhotoService
                 .thumbnailUrl(photo.getThumbnailUrl())
                 .filename(photo.getFilename())
                 .contentType(photo.getContentType())
-                .filename(photo.getFilename())
+                .fileSize(photo.getFileSize())
                 .uploadedAt(photo.getUploadedAt())
                 .category(categoryService.convertEntityToDto(photo.getCategory()))
                 .owner(userService.convertEntityToDto(photo.getOwner()))
