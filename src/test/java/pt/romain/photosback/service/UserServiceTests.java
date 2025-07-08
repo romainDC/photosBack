@@ -3,6 +3,7 @@ package pt.romain.photosback.service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,15 +21,17 @@ class UserServiceTests
     private static final String LOGIN = "testLogin";
     private static final String PASSWORD = "testPassword";
     private static final String MAIL = "testMail";
+    private static final String ENCODED_PASSWORD_MOCK = "encodedTestPassword"; // Un mot de passe encodé simulé
 
     private static UserRepository userRepositoryMock;
     private static UserService userServiceMock;
+    private static PasswordEncoder passwordEncoderMock;
 
     @BeforeAll
     static void setUpTests()
     {
         userRepositoryMock = mock(UserRepository.class);
-        PasswordEncoder passwordEncoderMock = mock(PasswordEncoder.class);
+        passwordEncoderMock = mock(PasswordEncoder.class);
         TeamService teamServiceMock = mock(TeamService.class);
         userServiceMock = new UserServiceImpl(passwordEncoderMock, teamServiceMock, userRepositoryMock);
     }
@@ -100,13 +103,18 @@ class UserServiceTests
         when(userRepositoryMock.findByMail(MAIL)).thenReturn(Optional.empty());
         when(userRepositoryMock.save(Mockito.any(User.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0)); // Returns the first argument passed to save()
+        when(passwordEncoderMock.encode(Mockito.anyString())).thenReturn(ENCODED_PASSWORD_MOCK);
 
         UserDto actualUserDto = userServiceMock.registerNewUser(userDto);
 
         verify(userRepositoryMock, times(1)).save(Mockito.any(User.class));
         Assertions.assertNotNull(actualUserDto);
         Assertions.assertEquals(LOGIN, actualUserDto.login());
-        Assertions.assertNotEquals(PASSWORD, actualUserDto.password());
+        Assertions.assertEquals(ENCODED_PASSWORD_MOCK, actualUserDto.password());
         Assertions.assertEquals(MAIL, actualUserDto.mail());
+
+        ArgumentCaptor<String> passwordCaptor = ArgumentCaptor.forClass(String.class);
+        verify(passwordEncoderMock, times(1)).encode(passwordCaptor.capture());
+        Assertions.assertEquals(PASSWORD, passwordCaptor.getValue(), "The original password should have been passed to the encoder.");
     }
 }
