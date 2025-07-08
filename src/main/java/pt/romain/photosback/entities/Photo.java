@@ -6,17 +6,16 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-@Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 public class Photo
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Exclude
     private Long id;
 
     @Column(nullable = false)
@@ -43,17 +42,17 @@ public class Photo
     @Column(name = "uploaded_at", nullable = false, updatable = false)
     private LocalDateTime uploadedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne()
     // Plusieurs photos peuvent appartenir à une catégorie
     @JoinColumn(name = "category_id") // Colonne de clé étrangère dans la table photos
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne()
     // Plusieurs photos peuvent appartenir à un utilisateur
     @JoinColumn(name = "owner_id", nullable = false) // Colonne de clé étrangère dans la table photos
     private User owner;
 
-    @ManyToMany(mappedBy = "photos", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "photos")
     private Set<Team> teams;
 
     @PrePersist

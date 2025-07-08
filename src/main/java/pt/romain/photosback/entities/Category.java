@@ -5,17 +5,16 @@ import lombok.*;
 
 import java.util.Set;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-@Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 public class Category
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Exclude
     private Long id;
 
     @Column(nullable = false, length = 50)

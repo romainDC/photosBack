@@ -6,17 +6,16 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-@Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 public class User
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Exclude
     private Long id;
 
     @Column(nullable = false, length = 50, unique = true)
@@ -34,7 +33,7 @@ public class User
     @OneToMany(mappedBy = "owner")
     private Set<Photo> photos;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne()
     // Plusieurs utilisateurs peuvent appartenir à un groupe
     @JoinColumn(name = "team_id") // Colonne de clé étrangère dans la table photos
     private Team team;
