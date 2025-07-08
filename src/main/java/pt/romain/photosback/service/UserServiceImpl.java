@@ -1,19 +1,25 @@
 package pt.romain.photosback.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pt.romain.photosback.dto.UserDto;
+import pt.romain.photosback.entities.Team;
 import pt.romain.photosback.entities.User;
 import pt.romain.photosback.repository.UserRepository;
 
 @Service
 public class UserServiceImpl implements UserService
 {
+    private final PasswordEncoder passwordEncoder;
     private final TeamService teamService;
     private final UserRepository userRepository;
 
-    public UserServiceImpl(TeamService teamService, UserRepository userRepository)
+    public UserServiceImpl(PasswordEncoder passwordEncoder,
+                           TeamService teamService,
+                           UserRepository userRepository)
     {
+        this.passwordEncoder = passwordEncoder;
         this.teamService = teamService;
         this.userRepository = userRepository;
     }
@@ -61,6 +67,9 @@ public class UserServiceImpl implements UserService
         if (userRepository.findByMail(user.getMail()).isPresent()) {
             throw new IllegalArgumentException("Email already registered.");
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Team team = user.getTeam();
+        user.setTeam(teamService.save(team));
         return convertEntityToDto(userRepository.save(user));
     }
 }

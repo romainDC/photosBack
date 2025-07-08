@@ -8,4 +8,6 @@ public interface TeamService
     TeamDto convertEntityToDto(Team team);
 
     Team convertDtoToEntity(TeamDto teamDto);
+
+    Team save(Team team);
 }
